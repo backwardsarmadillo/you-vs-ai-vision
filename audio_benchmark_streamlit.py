@@ -149,7 +149,6 @@ def resolve_adapter(dataset_id: str, adapter_mode: str):
     return adapter_generic, ADAPTER_GENERIC
 
 
-@st.cache_data(show_spinner=False)
 def load_round_pool(dataset_id: str, split: str, max_rows: int, adapter_mode: str, strict_mode: bool) -> tuple[list[dict], str]:
     ds = load_dataset(dataset_id, split=split)
     if "audio" not in ds.column_names:
