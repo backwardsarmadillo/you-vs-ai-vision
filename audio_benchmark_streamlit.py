@@ -294,7 +294,8 @@ with st.sidebar:
             if "Pickler._batch_setitems" in msg:
                 st.error(
                     "Failed to load dataset due to a Python/runtime incompatibility. "
-                    "Deploy with Python 3.11 or 3.12 (Render: add runtime.txt with python-3.11.9), then redeploy."
+                    "Deploy with Python 3.11 or 3.12 (Render: set PYTHON_VERSION=3.11.9 "
+                    "or add .python-version with 3.11.9), then redeploy."
                 )
             else:
                 st.error(f"Failed to load dataset: {msg}")
