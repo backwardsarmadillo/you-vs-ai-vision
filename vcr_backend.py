@@ -190,7 +190,7 @@ def ai_answer(req: AiAnswerRequest) -> dict[str, Any]:
 
 @app.get("/", include_in_schema=False)
 def root() -> RedirectResponse:
-    return RedirectResponse(url="/vcr_game.html")
+    return RedirectResponse(url="/games.html")
 
 
 # Serve the VCR frontend from the same host for easy deployment.
