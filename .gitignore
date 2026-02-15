@@ -1,5 +1,4 @@
 __pycache__/
 *.pyc
 vcr_raw/
-vcr_data/images/
 *.zip
