@@ -293,7 +293,8 @@ const data = {
     }
   ],
   wire: [],
-  physics: []
+  physics: [],
+  agent: []
 };
 
 const aiAccuracy = {
@@ -301,7 +302,8 @@ const aiAccuracy = {
   logic: 0.58,
   riddle: 0.46,
   wire: 0.44,
-  physics: 0.41
+  physics: 0.41,
+  agent: 0.35
 };
 
 const state = {
@@ -379,13 +381,100 @@ function buildPhysicsQuestionBank(count = 10) {
   return bank;
 }
 
+function createAgentFallbackPuzzle(index) {
+  return {
+    prompt:
+      `Agent fallback puzzle ${index + 1}:\n` +
+      `# # # # #\n` +
+      `# P . T #\n` +
+      `# . B . #\n` +
+      `# . . . #\n` +
+      `# # # # #\n\n` +
+      `Which is the best first move for P to eventually push B onto T?`,
+    options: ["UP", "DOWN", "LEFT", "RIGHT"],
+    answer: 1
+  };
+}
+
+function cloneAgentState(state) {
+  return {
+    width: state.width,
+    height: state.height,
+    layout: state.layout.map((row) => [...row]),
+    entities: {
+      player: { ...state.entities.player },
+      playerBox: { ...state.entities.playerBox },
+      playerTarget: { ...state.entities.playerTarget },
+      ai: { ...state.entities.ai },
+      aiBox: { ...state.entities.aiBox },
+      aiTarget: { ...state.entities.aiTarget }
+    },
+    turn: state.turn,
+    finished: state.finished,
+    winner: state.winner
+  };
+}
+
+function scorePlayerMove(simState) {
+  const box = simState.entities.playerBox;
+  const target = simState.entities.playerTarget;
+  const agent = simState.entities.player;
+  const boxDist = Math.abs(box.r - target.r) + Math.abs(box.c - target.c);
+  const agentToBox = Math.abs(agent.r - box.r) + Math.abs(agent.c - box.c);
+  return boxDist * 10 + agentToBox;
+}
+
+function buildAgentQuestionBank(count = 10) {
+  const bank = [];
+  const options = ["UP", "DOWN", "LEFT", "RIGHT"];
+  for (let i = 0; i < count; i += 1) {
+    if (typeof generateAgentPuzzle !== "function" || typeof moveAgent !== "function" || typeof renderAgentGame !== "function") {
+      bank.push(createAgentFallbackPuzzle(i));
+      continue;
+    }
+
+    const state = generateAgentPuzzle();
+    const rendered = renderAgentGame(state);
+    let bestMove = "UP";
+    let bestScore = Number.POSITIVE_INFINITY;
+    let validMoves = 0;
+
+    for (const move of options) {
+      const sim = cloneAgentState(state);
+      const result = moveAgent(sim, "player", move);
+      if (!result || !result.success) continue;
+      validMoves += 1;
+      const score = scorePlayerMove(sim);
+      if (score < bestScore) {
+        bestScore = score;
+        bestMove = move;
+      }
+    }
+
+    if (validMoves === 0) {
+      bestMove = "UP";
+    }
+
+    bank.push({
+      prompt:
+        "Agent Lab Puzzle:\n" +
+        "Guide P to push B onto T. What is the best first move?\n\n" +
+        rendered,
+      options,
+      answer: options.indexOf(bestMove)
+    });
+  }
+  return bank;
+}
+
 function shuffleQuestionBanks() {
   for (const key of Object.keys(data)) {
-    if (key === "wire" || key === "physics") continue;
+    if (key === "wire" || key === "physics" || key === "agent") continue;
     data[key] = shuffle(data[key]);
   }
   data.wire = buildWireQuestionBank(10);
   data.physics = buildPhysicsQuestionBank(10);
+  data.agent = buildAgentQuestionBank(10);
 }
 
 function normalize(text) {
@@ -590,10 +679,15 @@ function startMode(mode) {
   if (mode === "physics" && (!Array.isArray(data.physics) || data.physics.length === 0)) {
     data.physics = buildPhysicsQuestionBank(10);
   }
+  if (mode === "agent" && (!Array.isArray(data.agent) || data.agent.length === 0)) {
+    data.agent = buildAgentQuestionBank(10);
+  }
   if (mode === "wire") {
     modeHelp.textContent = `Mode: WIRE. Beat the AI over ${data[mode].length} rounds. Trace from start to finish; as you go down, if you hit a horizontal line, you must follow it across.`;
   } else if (mode === "physics") {
     modeHelp.textContent = `Mode: PHYSICS. Beat the AI over ${data[mode].length} rounds. Read the tower side-view and decide if it is stable (Yes) or falls (No) under gravity.`;
+  } else if (mode === "agent") {
+    modeHelp.textContent = `Mode: AGENT. Beat the AI over ${data[mode].length} rounds. Choose the best first move for P to eventually push B onto target T.`;
   } else {
     modeHelp.textContent = `Mode: ${mode.toUpperCase()}. Beat the AI over ${data[mode].length} rounds.`;
   }
@@ -611,7 +705,7 @@ function renderQuestion() {
   roundTitle.textContent = `${state.mode[0].toUpperCase()}${state.mode.slice(1)} Round`;
   questionCount.textContent = `Question ${state.index + 1}/${bank.length}`;
   questionText.textContent = current.prompt;
-  questionText.classList.toggle("question-mono", state.mode === "wire" || state.mode === "physics");
+  questionText.classList.toggle("question-mono", state.mode === "wire" || state.mode === "physics" || state.mode === "agent");
 
   if (state.mode === "riddle") {
     riddleWrap.hidden = false;
