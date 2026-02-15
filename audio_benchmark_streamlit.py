@@ -4,6 +4,7 @@ import json
 import os
 import random
 import re
+import sys
 from typing import Any
 
 import google.generativeai as genai
@@ -259,6 +260,11 @@ def draw_waveform(audio_array: np.ndarray, sr: int) -> None:
 st.set_page_config(page_title="Audio Duel Benchmark", layout="wide")
 st.title("Audio Duel: Human vs Gemini")
 st.caption("Mystery audio benchmark with multiple-choice scoring.")
+if sys.version_info >= (3, 14):
+    st.warning(
+        "Python 3.14 is currently incompatible with the Hugging Face datasets stack used here. "
+        "Use Python 3.11 or 3.12 for this app."
+    )
 
 with st.sidebar:
     st.subheader("Config")
@@ -284,7 +290,14 @@ with st.sidebar:
                 next_round()
                 st.success(f"Loaded {len(st.session_state.pool)} valid rounds using adapter: {resolved}.")
         except Exception as e:
-            st.error(f"Failed to load dataset: {e}")
+            msg = str(e)
+            if "Pickler._batch_setitems" in msg:
+                st.error(
+                    "Failed to load dataset due to a Python/runtime incompatibility. "
+                    "Deploy with Python 3.11 or 3.12 (Render: add runtime.txt with python-3.11.9), then redeploy."
+                )
+            else:
+                st.error(f"Failed to load dataset: {msg}")
 
 init_state()
 
