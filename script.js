@@ -296,6 +296,7 @@ const data = {
   physics: [],
   agent: []
 };
+let adversarialMerged = false;
 
 const aiAccuracy = {
   knowledge: 0.68,
@@ -331,6 +332,57 @@ function shuffle(items) {
     [copy[i], copy[j]] = [copy[j], copy[i]];
   }
   return copy;
+}
+
+function mergeAdversarialQuestionBank() {
+  if (adversarialMerged) return;
+  if (typeof adversarialData === "undefined" || !adversarialData) {
+    return;
+  }
+
+  const hasPrompt = new Set(
+    [...data.logic, ...data.riddle]
+      .filter((item) => item && typeof item.prompt === "string")
+      .map((item) => item.prompt.trim().toLowerCase())
+  );
+
+  let addedLogic = 0;
+  let addedRiddle = 0;
+
+  const logicList = Array.isArray(adversarialData.logic) ? adversarialData.logic : [];
+  for (const item of logicList) {
+    if (!item || typeof item.prompt !== "string" || !Array.isArray(item.options)) continue;
+    if (item.options.length !== 4 || !Number.isInteger(item.answer) || item.answer < 0 || item.answer > 3) continue;
+    const key = item.prompt.trim().toLowerCase();
+    if (!key || hasPrompt.has(key)) continue;
+    data.logic.push({
+      prompt: item.prompt,
+      options: item.options.map((opt) => String(opt)),
+      answer: item.answer
+    });
+    hasPrompt.add(key);
+    addedLogic += 1;
+  }
+
+  const riddleList = Array.isArray(adversarialData.riddle) ? adversarialData.riddle : [];
+  for (const item of riddleList) {
+    if (!item || typeof item.prompt !== "string" || !Array.isArray(item.accepted)) continue;
+    const accepted = item.accepted
+      .map((value) => String(value).trim())
+      .filter(Boolean);
+    if (!accepted.length) continue;
+    const key = item.prompt.trim().toLowerCase();
+    if (!key || hasPrompt.has(key)) continue;
+    data.riddle.push({
+      prompt: item.prompt,
+      accepted
+    });
+    hasPrompt.add(key);
+    addedRiddle += 1;
+  }
+
+  adversarialMerged = true;
+  debugLog(`Adversarial bank merged: +${addedLogic} logic, +${addedRiddle} riddle.`);
 }
 
 function createWireFallbackPuzzle(index) {
@@ -1249,6 +1301,7 @@ clearDebugLogBtn.addEventListener("click", () => {
   debugLog("Debug log cleared.");
 });
 
+mergeAdversarialQuestionBank();
 shuffleQuestionBanks();
 refreshAiFieldVisibility();
 geminiKeyEl.value = hardcodedGeminiKey;
