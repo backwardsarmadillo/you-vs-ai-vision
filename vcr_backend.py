@@ -18,6 +18,8 @@ ROOT = Path(__file__).resolve().parent
 DATA_DIR = ROOT / "vcr_data"
 IMAGES_DIR = DATA_DIR / "images"
 SAMPLES_FILE = DATA_DIR / "samples.json"
+DATA_DIR.mkdir(parents=True, exist_ok=True)
+IMAGES_DIR.mkdir(parents=True, exist_ok=True)
 
 # Use env var GEMINI_API_KEY in all environments.
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
