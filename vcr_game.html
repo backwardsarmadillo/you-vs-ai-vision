@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VCR Duel</title>
+  <link rel="stylesheet" href="vcr_game.css" />
+</head>
+<body>
+  <main class="app">
+    <header class="head">
+      <h1>VCR Duel</h1>
+      <p>Human vs AI on local Visual Commonsense samples</p>
+    </header>
+
+    <section class="panel scores">
+      <div><span>Human</span><strong id="humanScore">0</strong></div>
+      <div><span>AI</span><strong id="aiScore">0</strong></div>
+      <div><span>Round</span><strong id="roundCount">0</strong></div>
+      <div><span>Model</span><strong>gemini-2.0-flash</strong></div>
+    </section>
+
+    <section class="panel">
+      <p id="status">Loading round...</p>
+      <div class="scene-wrap">
+        <img id="sceneImage" class="scene" alt="VCR scene" />
+        <canvas id="overlayCanvas" class="overlay-canvas"></canvas>
+      </div>
+      <div id="overlayLegend" class="overlay-legend"></div>
+      <h2 id="questionText"></h2>
+      <div id="choices" class="choices"></div>
+      <div class="actions">
+        <button id="submitBtn" disabled>Submit</button>
+        <button id="nextBtn" hidden>Next Round</button>
+      </div>
+      <p id="result"></p>
+    </section>
+  </main>
+  <script src="vcr_game.js"></script>
+</body>
+</html>

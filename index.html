@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mind Arena: Human vs AI</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="app">
+    <header class="hero">
+      <div>
+        <p class="eyebrow">Text-First Tournament</p>
+        <h1>Mind Arena</h1>
+        <p class="sub">You vs AI across knowledge, logic, riddles, wire tracing, and physics.</p>
+      </div>
+      <svg class="hero-graphic" viewBox="0 0 220 120" aria-hidden="true">
+        <rect x="8" y="12" width="90" height="96" rx="16" class="chip chip-human" />
+        <rect x="122" y="12" width="90" height="96" rx="16" class="chip chip-ai" />
+        <path d="M102 60 H118" class="link" />
+        <circle cx="53" cy="60" r="14" class="dot" />
+        <circle cx="167" cy="60" r="14" class="dot" />
+      </svg>
+    </header>
+
+    <section class="panel connection-panel">
+      <div class="connection-row">
+        <span id="connectionDot" class="dot-indicator connected" aria-hidden="true"></span>
+        <strong id="connectionText">Connected: Simulated AI (offline)</strong>
+        <span id="connectionMeta">Latency: n/a</span>
+        <button id="restartGame" class="reset-btn" type="button">Restart Game</button>
+      </div>
+    </section>
+
+    <section class="scoreboard panel">
+      <div class="score"><span>You</span><strong id="playerScore">0</strong></div>
+      <div class="score"><span>AI</span><strong id="aiScore">0</strong></div>
+      <div class="score"><span>Team</span><strong id="teamScore">0</strong></div>
+      <div class="score"><span>Round</span><strong id="roundLabel">0</strong></div>
+    </section>
+
+    <section class="panel ai-panel">
+      <h2>AI Settings</h2>
+      <div class="ai-grid">
+        <label class="field">
+          <span>AI Provider</span>
+          <select id="aiProvider">
+            <option value="simulated">Simulated (Offline)</option>
+            <option value="gemini">Gemini API</option>
+            <option value="openai">GPT API (OpenAI)</option>
+          </select>
+        </label>
+      </div>
+      <p class="help">Fixed models: Gemini `gemini-3-flash-preview` | GPT `gpt-5-mini`.</p>
+      <label id="geminiKeyField" class="field">
+        <span>Gemini API Key (session only)</span>
+        <input id="geminiKey" type="password" placeholder="Paste your key here when using Gemini mode" autocomplete="off" />
+      </label>
+      <label id="openaiKeyField" class="field">
+        <span>OpenAI API Key (session only)</span>
+        <input id="openaiKey" type="password" placeholder="Paste your OpenAI key when using GPT mode" autocomplete="off" />
+      </label>
+      <p id="aiStatus" class="help">Current AI: Simulated (offline).</p>
+    </section>
+
+    <section class="panel mode-panel">
+      <h2>Choose Mode</h2>
+      <div class="mode-buttons">
+        <button class="mode-btn" data-mode="knowledge">Knowledge Quiz</button>
+        <button class="mode-btn" data-mode="logic">Logic Challenge</button>
+        <button class="mode-btn" data-mode="riddle">Riddle Battle</button>
+        <button class="mode-btn" data-mode="wire">Wire Challenge</button>
+        <button class="mode-btn" data-mode="physics">Physics Lab (New)</button>
+      </div>
+      <p id="modeHelp" class="help">Pick a mode to begin.</p>
+    </section>
+
+    <section class="panel round-panel" id="roundPanel" hidden>
+      <div class="round-head">
+        <h2 id="roundTitle">Round</h2>
+        <span id="questionCount">Question 1/1</span>
+      </div>
+      <p id="questionText" class="question"></p>
+
+      <div id="optionsWrap" class="options"></div>
+      <div id="riddleWrap" class="riddle-wrap" hidden>
+        <label for="riddleInput">Your answer</label>
+        <input id="riddleInput" type="text" autocomplete="off" placeholder="Type one word or short phrase" />
+      </div>
+
+      <div class="actions">
+        <button id="submitBtn">Submit</button>
+        <button id="skipBtn" type="button">Skip Question</button>
+        <button id="nextBtn" hidden>Next</button>
+      </div>
+      <p id="thinkingStatus" class="thinking-status" hidden>AI is thinking...</p>
+
+      <div id="resultBox" class="result" aria-live="polite"></div>
+    </section>
+
+    <section class="panel log-panel">
+      <h2>Match Log</h2>
+      <ul id="logList" class="log-list"></ul>
+    </section>
+
+    <section class="panel debug-panel">
+      <div class="debug-head">
+        <h2>Debug Log</h2>
+        <button id="clearDebugLog" type="button" class="reset-btn">Clear Debug</button>
+      </div>
+      <pre id="debugLog" class="debug-log" aria-live="polite"></pre>
+    </section>
+  </main>
+
+  <script src="wire_game_logic.js"></script>
+  <script src="physics_game_logic.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
